@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/FIFSAK/Gogram/internal/config"
+	"github.com/FIFSAK/Gogram/internal/handlers"
 	"github.com/FIFSAK/Gogram/internal/models"
 	"github.com/FIFSAK/Gogram/internal/store"
 	"github.com/go-chi/chi/v5"
@@ -22,11 +23,12 @@ func main() {
 
 	r := chi.NewRouter()
 
-	_ = app
+	handlers := handlers.New(app)
 
 	r.HandleFunc("/health", func(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusOK)
 		writer.Write([]byte("OK"))
 	})
-})
+	r.Get("/users", handlers.UserHandler.GetAllUsers)
+
 }
