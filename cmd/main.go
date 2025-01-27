@@ -12,9 +12,9 @@ import (
 
 func main() {
 
-	db, err := store.New("postgres://postgres:password@localhost:5432/gogram")
+	db, err := store.New("postgres://postgres:pass@localhost:5432/postgres?sslmode=disable")
 	if err != nil {
-		log.Fatalf("Error opening database: %v", err)
+		log.Fatalf("%v", err)
 	}
 
 	cfg := &config.Config{DB: db, Port: "8080"}
@@ -23,12 +23,18 @@ func main() {
 
 	r := chi.NewRouter()
 
-	handlers := handlers.New(app)
+	handler := handlers.New(app)
 
 	r.HandleFunc("/health", func(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusOK)
 		writer.Write([]byte("OK"))
 	})
-	r.Get("/users", handlers.UserHandler.GetAllUsers)
+	r.Get("/users", handler.UserHandler.GetAllUsers)
+
+	log.Printf("Starting server on port %s", cfg.Port)
+	err = http.ListenAndServe(":"+cfg.Port, r)
+	if err != nil {
+
+	}
 
 }

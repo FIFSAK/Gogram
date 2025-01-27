@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func New(dsn string) (*sql.DB, error) {
@@ -25,11 +26,6 @@ func New(dsn string) (*sql.DB, error) {
 func Migrate(db *sql.DB) error {
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 
-	if err != nil {
-		return fmt.Errorf("error pinging database: %v", err)
-	}
-
-	err = db.Ping()
 	if err != nil {
 		return fmt.Errorf("error pinging database: %v", err)
 	}
