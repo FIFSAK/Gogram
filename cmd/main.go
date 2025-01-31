@@ -1,19 +1,31 @@
 package main
 
 import (
+	"fmt"
 	"github.com/FIFSAK/Gogram/internal/config"
 	"github.com/FIFSAK/Gogram/internal/handlers"
 	"github.com/FIFSAK/Gogram/internal/middleware"
 	"github.com/FIFSAK/Gogram/internal/models"
 	"github.com/FIFSAK/Gogram/internal/store"
 	"github.com/go-chi/chi/v5"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+	user := os.Getenv("DB_USER")
+	pass := os.Getenv("DB_PASSWORD")
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+	dbname := os.Getenv("DB_NAME")
 
-	db, err := store.New("postgres://postgres:pass@localhost:5432/postgres?sslmode=disable")
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", user, pass, host, port, dbname)
+	db, err := store.New(dsn)
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
