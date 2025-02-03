@@ -1,0 +1,392 @@
+basePath: /
+definitions:
+  models.Chat:
+    properties:
+      id:
+        type: integer
+      user1_id:
+        type: integer
+      user2_id:
+        type: integer
+    type: object
+  models.Message:
+    properties:
+      chat_id:
+        type: integer
+      id:
+        type: integer
+      message:
+        type: string
+      sender_id:
+        type: integer
+      sent_at:
+        type: string
+    type: object
+  models.User:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for Gogram messaging application.
+  title: Gogram API
+  version: "1.0"
+paths:
+  /chat:
+    delete:
+      parameters:
+      - description: Chat ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Chat deleted
+          schema:
+            type: string
+        "400":
+          description: Invalid Chat ID
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Удалить чат
+      tags:
+      - chats
+    get:
+      parameters:
+      - description: Chat ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Chat'
+        "400":
+          description: Invalid Chat ID
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Получить чат
+      tags:
+      - chats
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User IDs
+        in: body
+        name: input
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Chat created
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Создать чат
+      tags:
+      - chats
+  /chats:
+    get:
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Chat'
+            type: array
+        "400":
+          description: Invalid User ID
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Получить все чаты пользователя
+      tags:
+      - chats
+  /login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Вход в систему
+      tags:
+      - users
+  /message:
+    delete:
+      parameters:
+      - description: Message ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Message deleted
+          schema:
+            type: string
+        "400":
+          description: Invalid Message ID
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Удалить сообщение
+      tags:
+      - messages
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Message data
+        in: body
+        name: input
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Message sent
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Отправить сообщение
+      tags:
+      - messages
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Updated message data
+        in: body
+        name: input
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Message updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Обновить сообщение
+      tags:
+      - messages
+  /messages:
+    get:
+      parameters:
+      - description: Chat ID
+        in: query
+        name: chat_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Message'
+            type: array
+        "400":
+          description: Invalid Chat ID
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Получить сообщения чата
+      tags:
+      - messages
+  /messages/search:
+    get:
+      parameters:
+      - description: Search text
+        in: query
+        name: text
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Message'
+            type: array
+        "400":
+          description: Search text is required
+          schema:
+            type: string
+        "404":
+          description: No messages found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Искать сообщения по содержимому
+      tags:
+      - messages
+  /register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Регистрация нового пользователя
+      tags:
+      - users
+  /search:
+    get:
+      parameters:
+      - description: Username
+        in: query
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Invalid request parameters
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Поиск пользователя
+      tags:
+      - users
+  /users:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Получить всех пользователей
+      tags:
+      - users
+schemes:
+- http
+swagger: "2.0"

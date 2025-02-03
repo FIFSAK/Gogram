@@ -1,5 +1,25 @@
-CREATE TABLE IF NOT EXISTS "user" (
-    id SERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS users
+(
+    id       SERIAL PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL
-)
+);
+
+CREATE TABLE IF NOT EXISTS chat
+(
+    id         SERIAL PRIMARY KEY,
+    user1_id   INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    user2_id   INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    UNIQUE (user1_id, user2_id)
+);
+
+CREATE TABLE IF NOT EXISTS message
+(
+    id        SERIAL PRIMARY KEY,
+    chat_id   INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    sender_id INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    text   TEXT    NOT NULL,
+    sent_at   TIMESTAMP DEFAULT now()
+);
+
+
