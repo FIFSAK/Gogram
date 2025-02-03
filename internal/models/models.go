@@ -5,11 +5,15 @@ import (
 )
 
 type Models struct {
-	User UserModel
+	User    UserModel
+	Chat    ChatModel
+	Message MessageModel
 }
 
 func NewModels(db *sql.DB) Models {
 	return Models{
-		User: UserModel{db: db},
+		User:    UserModel{db: db},
+		Chat:    ChatModel{db: db},
+		Message: MessageModel{db: db},
 	}
 }

@@ -4,11 +4,13 @@ FROM golang:1.22-alpine AS builder
 # Set the Current Working Directory inside the container
 WORKDIR /app
 
-COPY . .
-COPY .env .env
+COPY go.mod go.sum ./
 
 # Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
 RUN go mod tidy
+
+COPY . .
+COPY .env .env
 
 # Build the Go app
 RUN go build -o myapp ./cmd
