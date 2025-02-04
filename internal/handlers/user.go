@@ -14,6 +14,7 @@ type userHandler struct {
 }
 
 // GetAllUsers возвращает список всех пользователей
+// @Security BearerAuth
 // @Summary Получить всех пользователей
 // @Tags users
 // @Produce json

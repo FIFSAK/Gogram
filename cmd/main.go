@@ -4,6 +4,9 @@
 // @host localhost:8080
 // @BasePath /
 // @schemes http
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 package main
 
 import (
@@ -47,7 +50,7 @@ func main() {
 	handler := handlers.New(app)
 
 	r.Get("/swagger/*", httpSwagger.Handler(
-		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), // URL документации
+		httpSwagger.URL("/swagger/doc.json"), // URL документации
 	))
 	r.HandleFunc("/health", func(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusOK)
