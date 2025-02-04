@@ -15,6 +15,7 @@ type messageHandler struct {
 }
 
 // CreateMessage отправляет сообщение в чат
+// @Security BearerAuth
 // @Summary Отправить сообщение
 // @Tags messages
 // @Accept json
@@ -50,6 +51,7 @@ func (h messageHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetMessagesByChat получает сообщения чата
+// @Security BearerAuth
 // @Summary Получить сообщения чата
 // @Tags messages
 // @Produce json
@@ -75,6 +77,7 @@ func (h messageHandler) GetMessagesByChat(w http.ResponseWriter, r *http.Request
 }
 
 // DeleteMessage удаляет сообщение по его ID
+// @Security BearerAuth
 // @Summary Удалить сообщение
 // @Tags messages
 // @Param id query int true "Message ID"
@@ -99,6 +102,7 @@ func (h messageHandler) DeleteMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 // SearchMessages ищет сообщения по тексту
+// @Security BearerAuth
 // @Summary Искать сообщения по содержимому
 // @Tags messages
 // @Produce json
@@ -130,6 +134,7 @@ func (h messageHandler) SearchMessages(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateMessage обновляет текст сообщения по его ID
+// @Security BearerAuth
 // @Summary Обновить сообщение
 // @Tags messages
 // @Accept json

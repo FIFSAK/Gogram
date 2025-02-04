@@ -14,6 +14,7 @@ type chatHandler struct {
 }
 
 // CreateChat создает новый чат между двумя пользователями
+// @Security BearerAuth
 // @Summary Создать чат
 // @Tags chats
 // @Accept json
@@ -46,6 +47,7 @@ func (h chatHandler) CreateChat(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteChat удаляет чат
+// @Security BearerAuth
 // @Summary Удалить чат
 // @Tags chats
 // @Param id query int true "Chat ID"
@@ -68,6 +70,7 @@ func (h chatHandler) DeleteChat(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetChat получает чат по его ID
+// @Security BearerAuth
 // @Summary Получить чат
 // @Tags chats
 // @Produce json
@@ -99,6 +102,7 @@ func (h chatHandler) GetChat(w http.ResponseWriter, r *http.Request) {
 
 // GetUserChats получает все чаты, в которых участвует пользователь
 // @Summary Получить все чаты пользователя
+// @Security BearerAuth
 // @Tags chats
 // @Produce json
 // @Param user_id query int true "User ID"
