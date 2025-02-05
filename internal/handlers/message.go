@@ -20,28 +20,60 @@ type messageHandler struct {
 // @Tags messages
 // @Accept json
 // @Produce json
+// @Param receiverId query integer true "Receiver ID"
 // @Param input body object{ ChatID int64; SenderID int64; Text string } true "Message data"
 // @Success 201 {string} string "Message sent"
 // @Failure 400 {string} string "Bad Request"
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /message [post]
 func (h messageHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		ChatID   int64  `json:"chat_id"`
-		SenderID int64  `json:"sender_id"`
-		Text     string `json:"text"`
+	receiverId, err := strconv.Atoi(r.URL.Query().Get("receiverId"))
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Invalid receiver ID", http.StatusBadRequest)
+		return
 	}
-	err := json.NewDecoder(r.Body).Decode(&input)
+	senderId, err := GetUserIDFromContext(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	chat, err := h.App.Models.Chat.CheckExists(senderId, int64(receiverId))
+	if err != nil {
+		http.Error(w, "Error checking chat existence", http.StatusInternalServerError)
+		return
+	}
+
+	// Если чата нет, возвращаем 404
+	if chat.ID == 0 {
+		chat = models.Chat{
+			User1Id: senderId,
+			User2Id: int64(receiverId),
+		}
+		id, err := h.App.Models.Chat.Insert(chat)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		chat.ID = int64(id)
+	}
+
+	var input struct {
+		Text string `json:"text"`
+	}
+	err = json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	message := models.Message{
-		ChatID:   input.ChatID,
-		SenderID: input.SenderID,
+		ChatID:   chat.ID,
+		SenderID: senderId,
 		Text:     input.Text,
 		SentAt:   time.Now().Format("2006-01-02 15:04:05"),
 	}
+
 	err = h.App.Models.Message.Insert(message)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -149,11 +181,29 @@ func (h messageHandler) UpdateMessage(w http.ResponseWriter, r *http.Request) {
 		ID   int64  `json:"id"`
 		Text string `json:"text"`
 	}
+	user_id, err := GetUserIDFromContext(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 
-	err := json.NewDecoder(r.Body).Decode(&input)
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
+	}
+
+	message, err := h.App.Models.Message.GetMessageById(input.ID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if message.SenderID != user_id {
+		http.Error(w, "You are not the sender of this message", http.StatusForbidden)
+		return
+
 	}
 
 	err = h.App.Models.Message.Update(models.Message{ID: input.ID, Text: input.Text})

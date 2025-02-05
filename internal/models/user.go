@@ -6,6 +6,7 @@ import (
 )
 
 type User struct {
+	ID       int    `json:"id"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
@@ -43,10 +44,10 @@ func (m *UserModel) Delete(user User) error {
 }
 
 func (m *UserModel) Get(username string) (User, error) {
-	query := "SELECT username, password FROM users WHERE username=$1"
+	query := "SELECT id, username, password FROM users WHERE username=$1"
 	row := m.db.QueryRow(query, username)
 	var user User
-	err := row.Scan(&user.Username, &user.Password)
+	err := row.Scan(&user.ID, &user.Username, &user.Password)
 	if err != nil {
 		return User{}, fmt.Errorf("error getting user: %v", err)
 	}
@@ -54,19 +55,19 @@ func (m *UserModel) Get(username string) (User, error) {
 }
 
 func (m *UserModel) GetAll() ([]User, error) {
-	query := "SELECT username, password FROM users"
+	query := "SELECT username FROM users"
 	rows, err := m.db.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("error getting users: %v", err)
 	}
-	err = rows.Close()
+	defer rows.Close()
 	if err != nil {
 		fmt.Printf("error closing rows: %v", err)
 	}
 	var users []User
 	for rows.Next() {
 		var user User
-		err := rows.Scan(&user.Username, &user.Password)
+		err := rows.Scan(&user.Username)
 		if err != nil {
 			return nil, fmt.Errorf("error getting users: %v", err)
 		}
@@ -76,19 +77,19 @@ func (m *UserModel) GetAll() ([]User, error) {
 }
 
 func (m *UserModel) FindUser(username string) ([]User, error) {
-	query := "SELECT username, password FROM users WHERE username LIKE $1"
-	rows, err := m.db.Query(query, username)
+	query := "SELECT username FROM users WHERE username ILIKE $1"
+	rows, err := m.db.Query(query, username+"%")
 	if err != nil {
 		return nil, fmt.Errorf("error getting users: %v", err)
 	}
-	err = rows.Close()
+	defer rows.Close()
 	if err != nil {
 		fmt.Printf("error closing rows: %v", err)
 	}
 	var users []User
 	for rows.Next() {
 		var user User
-		err := rows.Scan(&user.Username, &user.Password)
+		err := rows.Scan(&user.Username)
 		if err != nil {
 			return nil, fmt.Errorf("error getting users: %v", err)
 		}

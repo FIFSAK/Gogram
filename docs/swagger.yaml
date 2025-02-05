@@ -89,36 +89,6 @@ paths:
       summary: Получить чат
       tags:
       - chats
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: User IDs
-        in: body
-        name: input
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Chat created
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Создать чат
-      tags:
-      - chats
   /chats:
     get:
       parameters:
@@ -212,6 +182,11 @@ paths:
       consumes:
       - application/json
       parameters:
+      - description: Receiver ID
+        in: query
+        name: receiverId
+        required: true
+        type: integer
       - description: Message data
         in: body
         name: input
@@ -384,6 +359,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Поиск пользователя
       tags:
       - users
@@ -398,6 +375,10 @@ paths:
             items:
               $ref: '#/definitions/models.User'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
         "500":
           description: Internal Server Error
           schema:

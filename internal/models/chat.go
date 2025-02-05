@@ -12,13 +12,15 @@ type ChatModel struct {
 	db *sql.DB
 }
 
-func (m *ChatModel) Insert(chat Chat) error {
-	query := "INSERT INTO chat (user1_id, user2_id) VALUES ($1, $2)"
-	_, err := m.db.Exec(query, chat.User1Id, chat.User2Id)
+func (m *ChatModel) Insert(chat Chat) (int, error) {
+	query := "INSERT INTO chat (user1_id, user2_id) VALUES ($1, $2) RETURNING id"
+
+	var id int
+	err := m.db.QueryRow(query, chat.User1Id, chat.User2Id).Scan(&id)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return id, nil
 }
 
 func (m *ChatModel) Delete(chat Chat) error {
@@ -36,6 +38,21 @@ func (m *ChatModel) Get(id int64) (Chat, error) {
 	var chat Chat
 	err := row.Scan(&chat.ID, &chat.User1Id, &chat.User2Id)
 	if err != nil {
+		return Chat{}, err
+	}
+	return chat, nil
+}
+
+func (m *ChatModel) CheckExists(user1Id, user2Id int64) (Chat, error) {
+	query := "SELECT id, user1_id, user2_id FROM chat WHERE (user1_id=$1 AND user2_id=$2) OR (user1_id=$2 AND user2_id=$1)"
+	row := m.db.QueryRow(query, user1Id, user2Id)
+
+	var chat Chat
+	err := row.Scan(&chat.ID, &chat.User1Id, &chat.User2Id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return Chat{}, nil
+		}
 		return Chat{}, err
 	}
 	return chat, nil

@@ -59,9 +59,9 @@ func main() {
 	r.Get("/users", middleware.RequireAuth(handler.UserHandler.GetAllUsers))
 	r.Post("/register", handler.UserHandler.Register)
 	r.Post("/login", handler.UserHandler.Login)
+	r.Get("/search", middleware.RequireAuth(handler.UserHandler.Search))
 
-	r.Post("/search", middleware.RequireAuth(handler.UserHandler.Search))
-	r.Post("/chat", middleware.RequireAuth(handler.ChatHandler.CreateChat))
+	//r.Post("/chat", middleware.RequireAuth(handler.ChatHandler.CreateChat))
 	r.Delete("/chat", middleware.RequireAuth(handler.ChatHandler.DeleteChat))
 	r.Get("/chat", middleware.RequireAuth(handler.ChatHandler.GetChat))
 	r.Get("/chats", middleware.RequireAuth(handler.ChatHandler.GetUserChats))

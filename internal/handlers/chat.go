@@ -13,38 +13,39 @@ type chatHandler struct {
 	App *config.Application
 }
 
-// CreateChat создает новый чат между двумя пользователями
-// @Security BearerAuth
-// @Summary Создать чат
-// @Tags chats
-// @Accept json
-// @Produce json
-// @Param input body object{ User1Id int64; User2Id int64 } true "User IDs"
-// @Success 201 {string} string "Chat created"
-// @Failure 400 {string} string "Bad Request"
-// @Failure 500 {string} string "Internal Server Error"
-// @Router /chat [post]
-func (h chatHandler) CreateChat(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		User1Id int64 `json:"user1_id"`
-		User2Id int64 `json:"user2_id"`
-	}
-	err := json.NewDecoder(r.Body).Decode(&input)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	chat := models.Chat{
-		User1Id: input.User1Id,
-		User2Id: input.User2Id,
-	}
-	err = h.App.Models.Chat.Insert(chat)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusCreated)
-}
+//// CreateChat создает новый чат
+//// @Summary Создать чат
+//// @Tags chats
+//// @Security BearerAuth
+//// @Accept json
+//// @Produce json
+//// @Param input body object{ User1Id int64; User2Id int64 } true "User IDs"
+//// @Success 201 {string} string "Chat created"
+//// @Failure 401 {string} string "Unauthorized"
+//// @Failure 400 {string} string "Bad Request"
+//// @Failure 500 {string} string "Internal Server Error"
+//// @Router /chat [post]
+//func (h chatHandler) CreateChat(w http.ResponseWriter, r *http.Request) {
+//	var input struct {
+//		User1Id int64 `json:"user1_id"`
+//		User2Id int64 `json:"user2_id"`
+//	}
+//	err := json.NewDecoder(r.Body).Decode(&input)
+//	if err != nil {
+//		http.Error(w, err.Error(), http.StatusBadRequest)
+//		return
+//	}
+//	chat := models.Chat{
+//		User1Id: input.User1Id,
+//		User2Id: input.User2Id,
+//	}
+//	err = h.App.Models.Chat.Insert(chat)
+//	if err != nil {
+//		http.Error(w, err.Error(), http.StatusInternalServerError)
+//		return
+//	}
+//	w.WriteHeader(http.StatusCreated)
+//}
 
 // DeleteChat удаляет чат
 // @Security BearerAuth
@@ -111,13 +112,13 @@ func (h chatHandler) GetChat(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /chats [get]
 func (h chatHandler) GetUserChats(w http.ResponseWriter, r *http.Request) {
-	userID, err := strconv.ParseInt(r.URL.Query().Get("user_id"), 10, 64)
+	userId, err := GetUserIDFromContext(r)
 	if err != nil {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
 
-	chats, err := h.App.Models.Chat.GetUserChatAll(userID)
+	chats, err := h.App.Models.Chat.GetUserChatAll(userId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

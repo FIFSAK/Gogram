@@ -14,11 +14,12 @@ type userHandler struct {
 }
 
 // GetAllUsers возвращает список всех пользователей
-// @Security BearerAuth
 // @Summary Получить всех пользователей
 // @Tags users
+// @Security BearerAuth
 // @Produce json
 // @Success 200 {array} models.User
+// @Failure 401 {string} string "Unauthorized"
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /users [get]
 func (m userHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
@@ -89,7 +90,7 @@ func (m userHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if middleware.ComparePasswords(user.Password, input.Password) {
-		token, err := middleware.GenerateToken(user.Username)
+		token, err := middleware.GenerateToken(int64(user.ID))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -104,6 +105,7 @@ func (m userHandler) Login(w http.ResponseWriter, r *http.Request) {
 // Search ищет пользователя по имени пользователя
 // @Summary Поиск пользователя
 // @Tags users
+// @Security BearerAuth
 // @Produce json
 // @Param username query string true "Username"
 // @Success 200 {object} models.User
@@ -117,7 +119,7 @@ func (m userHandler) Search(w http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	user, err := m.App.Models.User.Get(username)
+	user, err := m.App.Models.User.FindUser(username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
