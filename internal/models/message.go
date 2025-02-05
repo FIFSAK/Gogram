@@ -33,8 +33,8 @@ func (m *MessageModel) Delete(message Message) error {
 }
 
 func (m *MessageModel) SearchMessage(strMessage string) []Message {
-	query := "SELECT * from message where text like '%$1%'"
-	rows, err := m.db.Query(query, strMessage)
+	query := "SELECT * from message where text ILIKE $1"
+	rows, err := m.db.Query(query, "%"+strMessage+"%")
 	if err != nil {
 		return nil
 	}
@@ -68,6 +68,17 @@ func (m *MessageModel) GetMessagesByChatID(chatID int64) []Message {
 		messages = append(messages, message)
 	}
 	return messages
+}
+
+func (m *MessageModel) GetMessageById(id int64) (Message, error) {
+	query := "SELECT * from message where id=$1"
+	row := m.db.QueryRow(query, id)
+	var message Message
+	err := row.Scan(&message.ID, &message.ChatID, &message.SenderID, &message.Text, &message.SentAt)
+	if err != nil {
+		return Message{}, err
+	}
+	return message, nil
 }
 
 func (m *MessageModel) Update(message Message) error {

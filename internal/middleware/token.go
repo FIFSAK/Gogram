@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"time"
 )
@@ -17,12 +18,13 @@ type Token struct {
 var jwtSecret = []byte("your-secret-key") // Change this to a strong secret key
 
 // GenerateToken creates a JWT token for a given username
-func GenerateToken(username string) (string, error) {
+func GenerateToken(id int64) (string, error) {
 	// Define token claims
+	fmt.Println(id)
 	claims := jwt.MapClaims{
-		"username": username,
-		"exp":      time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
-		"iat":      time.Now().Unix(),                     // Issued at
+		"id":  id,
+		"exp": time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
+		"iat": time.Now().Unix(),                     // Issued at
 	}
 
 	// Create token with claims
