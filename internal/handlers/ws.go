@@ -35,10 +35,7 @@ func (h *messageHandler) WebSocketHandler(w http.ResponseWriter, r *http.Request
 	}()
 
 	for {
-		var msg struct {
-			Text       string `json:"text"`
-			ReceiverID int64  `json:"receiver_id"`
-		}
+		var msg interface{}
 		err = conn.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("Error reading json: %v\n", err)

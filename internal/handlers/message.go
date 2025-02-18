@@ -77,10 +77,8 @@ func (h messageHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Пытаемся отправить
 	err = h.Hub.SendMessage(input.ReceiverID, message)
 	if err != nil {
-		// Например, игнорируем ошибку, если пользователь оффлайн:
 		fmt.Printf("Cannot send message to user %d: %v\n", input.ReceiverID, err)
 	}
 
