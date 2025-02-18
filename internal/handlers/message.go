@@ -23,25 +23,29 @@ type messageHandler struct {
 // @Accept json
 // @Produce json
 // @Param receiverId query integer true "Receiver ID"
-// @Param input body object{ ChatID int64; SenderID int64; Text string } true "Message data"
+// @Param input body object{receiver_id int64; Text string } true "Message data"
 // @Success 201 {string} string "Message sent"
 // @Failure 400 {string} string "Bad Request"
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /message [post]
 func (h messageHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
-	receiverId, err := strconv.Atoi(r.URL.Query().Get("receiverId"))
+	var input struct {
+		Text       string `json:"text"`
+		ReceiverID int64  `json:"receiver_id"`
+	}
+	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "Invalid receiver ID", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	senderId, err := GetUserIDFromContext(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	chat, err := h.App.Models.Chat.CheckExists(senderId, int64(receiverId))
+	chat, err := h.App.Models.Chat.CheckExists(senderId, input.ReceiverID)
 	if err != nil {
 		http.Error(w, "Error checking chat existence", http.StatusInternalServerError)
 		return
@@ -50,7 +54,7 @@ func (h messageHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 	if chat.ID == 0 {
 		chat = models.Chat{
 			User1Id: senderId,
-			User2Id: int64(receiverId),
+			User2Id: input.ReceiverID,
 		}
 		id, err := h.App.Models.Chat.Insert(chat)
 		if err != nil {
@@ -60,14 +64,6 @@ func (h messageHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 		chat.ID = int64(id)
 	}
 
-	var input struct {
-		Text string `json:"text"`
-	}
-	err = json.NewDecoder(r.Body).Decode(&input)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
 	message := models.Message{
 		ChatID:   chat.ID,
 		SenderID: senderId,
@@ -82,10 +78,10 @@ func (h messageHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Пытаемся отправить
-	err = h.Hub.SendMessage(int64(receiverId), message)
+	err = h.Hub.SendMessage(input.ReceiverID, message)
 	if err != nil {
 		// Например, игнорируем ошибку, если пользователь оффлайн:
-		fmt.Printf("Cannot send message to user %d: %v\n", receiverId, err)
+		fmt.Printf("Cannot send message to user %d: %v\n", input.ReceiverID, err)
 	}
 
 	w.WriteHeader(http.StatusCreated)

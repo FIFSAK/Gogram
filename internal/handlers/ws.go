@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
@@ -12,14 +13,11 @@ func (h *messageHandler) WebSocketHandler(w http.ResponseWriter, r *http.Request
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	// Поднимаем соединение
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
-		// По умолчанию Upgrader не разрешает запросы из других Origin
-		// Если нужно разрешить – настройки CORS здесь.
+
 		CheckOrigin: func(r *http.Request) bool {
-			// Разрешить все источники или написать свою логику
 			return true
 		},
 	}
@@ -30,29 +28,23 @@ func (h *messageHandler) WebSocketHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// Регистрируем соединение в нашем хабе
 	h.Hub.RegisterConnection(userID, conn)
 	defer func() {
-		// При выходе (закрытии хендлера) – отрегестрируем
 		h.Hub.UnregisterConnection(userID)
 		conn.Close()
 	}()
 
-	// Запускаем цикл чтения сообщений от клиента (если нужно)
 	for {
-		var msg map[string]interface{}
-		err := conn.ReadJSON(&msg)
+		var msg struct {
+			Text       string `json:"text"`
+			ReceiverID int64  `json:"receiver_id"`
+		}
+		err = conn.ReadJSON(&msg)
 		if err != nil {
-			// Когда клиент закрывает соединение, err != nil
 			log.Printf("Error reading json: %v\n", err)
 			break
 		}
+		fmt.Println(msg)
 
-		// Обрабатываем входящее сообщение
-		// (Если нужно реализовать двухсторонний обмен)
-		log.Printf("Received message from user %d: %+v\n", userID, msg)
-
-		// Можете проверить тип сообщения (например, "ping", "typing" и т.д.)
-		// и отправить нужным пользователям.
 	}
 }

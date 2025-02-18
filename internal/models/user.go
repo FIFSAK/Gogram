@@ -55,7 +55,7 @@ func (m *UserModel) Get(username string) (User, error) {
 }
 
 func (m *UserModel) GetAll() ([]User, error) {
-	query := "SELECT username FROM users"
+	query := "SELECT id, username FROM users"
 	rows, err := m.db.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("error getting users: %v", err)
@@ -67,7 +67,7 @@ func (m *UserModel) GetAll() ([]User, error) {
 	var users []User
 	for rows.Next() {
 		var user User
-		err := rows.Scan(&user.Username)
+		err := rows.Scan(&user.ID, &user.Username)
 		if err != nil {
 			return nil, fmt.Errorf("error getting users: %v", err)
 		}
