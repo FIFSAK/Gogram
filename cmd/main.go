@@ -17,6 +17,7 @@ import (
 	"github.com/FIFSAK/Gogram/internal/middleware"
 	"github.com/FIFSAK/Gogram/internal/models"
 	"github.com/FIFSAK/Gogram/internal/store"
+	"github.com/FIFSAK/Gogram/internal/ws"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -47,7 +48,7 @@ func main() {
 
 	r := chi.NewRouter()
 
-	handler := handlers.New(app)
+	handler := handlers.New(app, ws.NewHub())
 
 	r.Get("/swagger/*", httpSwagger.Handler(
 		httpSwagger.URL("/swagger/doc.json"), // URL документации
@@ -71,7 +72,7 @@ func main() {
 	r.Get("/messages/search", middleware.RequireAuth(handler.MessageHandler.SearchMessages))
 	r.Get("/messages", middleware.RequireAuth(handler.MessageHandler.GetMessagesByChat))
 	r.Put("/message", middleware.RequireAuth(handler.MessageHandler.UpdateMessage))
-
+	r.Get("/ws", middleware.RequireAuth(handler.MessageHandler.WebSocketHandler))
 	log.Printf("Starting server on port %s", cfg.Port)
 	err = http.ListenAndServe(":"+cfg.Port, r)
 	if err != nil {

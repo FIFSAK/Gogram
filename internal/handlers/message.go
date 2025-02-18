@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/FIFSAK/Gogram/internal/config"
 	"github.com/FIFSAK/Gogram/internal/models"
+	"github.com/FIFSAK/Gogram/internal/ws"
 	"net/http"
 	"strconv"
 	"time"
@@ -12,6 +13,7 @@ import (
 
 type messageHandler struct {
 	App *config.Application
+	Hub *ws.Hub
 }
 
 // CreateMessage отправляет сообщение в чат
@@ -45,7 +47,6 @@ func (h messageHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Если чата нет, возвращаем 404
 	if chat.ID == 0 {
 		chat = models.Chat{
 			User1Id: senderId,
@@ -79,6 +80,14 @@ func (h messageHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	// Пытаемся отправить
+	err = h.Hub.SendMessage(int64(receiverId), message)
+	if err != nil {
+		// Например, игнорируем ошибку, если пользователь оффлайн:
+		fmt.Printf("Cannot send message to user %d: %v\n", receiverId, err)
+	}
+
 	w.WriteHeader(http.StatusCreated)
 }
 

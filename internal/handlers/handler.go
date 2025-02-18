@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"github.com/FIFSAK/Gogram/internal/config"
+	"github.com/FIFSAK/Gogram/internal/ws"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 )
@@ -13,11 +14,11 @@ type Handler struct {
 	MessageHandler messageHandler
 }
 
-func New(app *config.Application) Handler {
+func New(app *config.Application, hub *ws.Hub) Handler {
 	return Handler{
 		UserHandler:    userHandler{App: app},
 		ChatHandler:    chatHandler{App: app},
-		MessageHandler: messageHandler{App: app},
+		MessageHandler: messageHandler{App: app, Hub: hub},
 	}
 }
 
